@@ -1,0 +1,403 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2709
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 <!DOCTYPE html>\
+<html lang="en">\
+<head>\
+  <meta charset="UTF-8" />\
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />\
+  <title>Mahjong Scorekeeper</title>\
+  <!-- Styles: red & gold Chinese theme -->\
+  <style>\
+    body \{\
+      background: #8B0000; /* dark red background */\
+      color: #FFFFFF;     /* white text (use gold for highlights) */\
+      font-family: sans-serif;\
+      margin: 0;\
+      padding: 0;\
+    \}\
+    #app \{\
+      max-width: 600px;\
+      margin: auto;\
+      padding: 10px;\
+      /* Optional: add a subtle patterned background or border for Chinese theme */\
+      border: 3px double gold;\
+      border-radius: 8px;\
+      background: rgba(0,0,0,0.1); /* slight transparent overlay */\
+    \}\
+    h1, h2 \{\
+      text-align: center;\
+      color: gold;\
+      margin: 10px 0;\
+    \}\
+    .screen \{\
+      display: none; /* all screens hidden by default, we will show one at a time */\
+    \}\
+    .screen.active \{\
+      display: block;\
+    \}\
+    /* Form elements styling for mobile */\
+    label \{\
+      display: block;\
+      margin: 8px 0 4px;\
+      font-weight: bold;\
+    \}\
+    input[type=text], input[type=number], select \{\
+      width: 100%;\
+      padding: 8px;\
+      font-size: 16px;\
+      border: 2px solid gold;\
+      border-radius: 4px;\
+      background: #330000; /* dark background for inputs to match theme */\
+      color: #FFFFFF;\
+      box-sizing: border-box;\
+      -webkit-appearance: none;\
+      appearance: none;\
+    \}\
+    input[type=number]::-webkit-outer-spin-button,\
+    input[type=number]::-webkit-inner-spin-button \{\
+      -webkit-appearance: none;\
+      margin: 0;\
+    \}\
+    /* Radio buttons */\
+    .radio-group \{\
+      margin: 8px 0;\
+    \}\
+    .radio-group label \{\
+      display: inline-block;\
+      font-weight: normal;\
+      margin-right: 10px;\
+    \}\
+    .radio-group input[type=radio] \{\
+      margin-right: 4px;\
+    \}\
+    /* Buttons */\
+    button \{\
+      background: gold;\
+      color: #8B0000;\
+      font-weight: bold;\
+      border: 2px solid #8B0000;\
+      border-radius: 4px;\
+      padding: 10px 20px;\
+      font-size: 16px;\
+      margin: 10px 5px 0 0;\
+      cursor: pointer;\
+      -webkit-appearance: none;\
+      appearance: none;\
+    \}\
+    button:hover \{\
+      background: #ffd700cc; /* slightly darker on hover */\
+    \}\
+    /* Scoreboard and history */\
+    #scoreboard ul, #history ul \{\
+      list-style: none;\
+      padding: 0;\
+    \}\
+    #scoreboard li, #history li \{\
+      margin: 4px 0;\
+    \}\
+    #history li \{\
+      font-size: 14px;\
+    \}\
+    #history li span.wind-assign \{\
+      color: gold;\
+    \}\
+  </style>\
+</head>\
+<body>\
+  <div id="app">\
+    <h1>Mahjong Scorekeeper</h1>\
+    <!-- Screen 1: Player name input -->\
+    <div id="playerInputScreen" class="screen active">\
+      <h2>Enter Player Names</h2>\
+      <p>Please enter the names of the 4 players:</p>\
+      <div>\
+        <label for="name1">Player 1:</label>\
+        <input type="text" id="name1" placeholder="Name 1" />\
+      </div>\
+      <div>\
+        <label for="name2">Player 2:</label>\
+        <input type="text" id="name2" placeholder="Name 2" />\
+      </div>\
+      <div>\
+        <label for="name3">Player 3:</label>\
+        <input type="text" id="name3" placeholder="Name 3" />\
+      </div>\
+      <div>\
+        <label for="name4">Player 4:</label>\
+        <input type="text" id="name4" placeholder="Name 4" />\
+      </div>\
+      <button id="startGameBtn">Start Game</button>\
+    </div>\
+\
+    <!-- Screen 2: Wind assignment recap for current round -->\
+    <div id="windScreen" class="screen">\
+      <h2>Round <span id="roundNumber">1</span> - Winds Assignment</h2>\
+      <p>Assigned winds for this round:</p>\
+      <ul id="windAssignmentList">\
+        <!-- e.g., <li>Don: PlayerName</li> etc. will be filled by script -->\
+      </ul>\
+      <button id="toScoreInputBtn">Continue</button>\
+    </div>\
+\
+    <!-- Screen 3: Score input for the round result -->\
+    <div id="scoreInputScreen" class="screen">\
+      <h2>Round <span id="roundNumber2">1</span> - Enter Round Result</h2>\
+      <label for="winnerSelect">Winner:</label>\
+      <select id="winnerSelect">\
+        <!-- options will be populated by script with player names -->\
+      </select>\
+      <div class="radio-group">\
+        <label><input type="radio" name="winType" value="self" id="selfDrawRadio" checked /> Self-draw (win by self)</label>\
+        <label><input type="radio" name="winType" value="discard" id="discardRadio" /> Win by discard from:</label>\
+      </div>\
+      <select id="loserSelect" disabled>\
+        <!-- populated with losing players if "discard" is selected -->\
+      </select>\
+      <label for="scoreInput">Score (points):</label>\
+      <!-- Note: for simplicity we use a number input. For a more thematic approach, you could replace this with Mahjong tile images as input buttons. -->\
+      <input type="number" id="scoreInput" min="1" max="88" placeholder="e.g., 8" />\
+      <button id="submitScoreBtn">Submit Score</button>\
+    </div>\
+\
+    <!-- Screen 4: Summary of scores and history after each round -->\
+    <div id="summaryScreen" class="screen">\
+      <h2>Game Summary</h2>\
+      <div id="scoreboard">\
+        <h3>Total Scores:</h3>\
+        <ul id="scoreList">\
+          <!-- list of "Name: score" -->\
+        </ul>\
+      </div>\
+      <div id="history">\
+        <h3>Round History:</h3>\
+        <ul id="historyList">\
+          <!-- round history entries -->\
+        </ul>\
+      </div>\
+      <button id="nextRoundBtn">Next Round</button>\
+      <button id="endGameBtn">End Game</button>\
+    </div>\
+  </div> <!-- end #app container -->\
+\
+  <!-- JavaScript logic -->\
+  <script>\
+    // Global variables to hold game state\
+    let players = [];          // array of player names (length 4)\
+    let scores = [0, 0, 0, 0];  // total scores corresponding to players array\
+    let seatOrder = [0, 1, 2, 3]; // will represent the indices of players assigned to Don,Nan,Xi,Bei\
+    let round = 1;\
+    const winds = ["Don", "Nan", "Xi", "Bei"]; // names for East, South, West, North winds\
+    let history = [];          // history of rounds (each entry an object with details)\
+\
+    // Helper: show a screen by id and hide others\
+    function showScreen(screenId) \{\
+      document.querySelectorAll('.screen').forEach(div => \{\
+        div.classList.remove('active');\
+      \});\
+      document.getElementById(screenId).classList.add('active');\
+    \}\
+\
+    // Assign initial winds randomly\
+    function assignInitialWinds() \{\
+      // Randomize the seatOrder array\
+      for (let i = seatOrder.length - 1; i > 0; i--) \{\
+        const j = Math.floor(Math.random() * (i + 1));\
+        [seatOrder[i], seatOrder[j]] = [seatOrder[j], seatOrder[i]];\
+      \}\
+    \}\
+\
+    // Update the wind assignment list UI for current round\
+    function updateWindAssignmentUI() \{\
+      const list = document.getElementById('windAssignmentList');\
+      list.innerHTML = "";\
+      for (let w = 0; w < 4; w++) \{\
+        const li = document.createElement('li');\
+        const playerIndex = seatOrder[w];\
+        li.textContent = winds[w] + ": " + players[playerIndex];\
+        list.appendChild(li);\
+      \}\
+      // update round number display\
+      document.getElementById('roundNumber').textContent = round;\
+      document.getElementById('roundNumber2').textContent = round;\
+    \}\
+\
+    // Populate the winner dropdown with player names\
+    function populateWinnerDropdown() \{\
+      const winnerSelect = document.getElementById('winnerSelect');\
+      winnerSelect.innerHTML = "";\
+      players.forEach((name, idx) => \{\
+        const opt = document.createElement('option');\
+        opt.value = idx;\
+        opt.textContent = name;\
+        winnerSelect.appendChild(opt);\
+      \});\
+    \}\
+\
+    // Update loser dropdown options to exclude current winner\
+    function updateLoserOptions() \{\
+      const loserSelect = document.getElementById('loserSelect');\
+      const winnerIdx = parseInt(document.getElementById('winnerSelect').value);\
+      loserSelect.innerHTML = "";\
+      players.forEach((name, idx) => \{\
+        if (idx !== winnerIdx) \{\
+          const opt = document.createElement('option');\
+          opt.value = idx;\
+          opt.textContent = name;\
+          loserSelect.appendChild(opt);\
+        \}\
+      \});\
+      // If discard radio is checked, enable loserSelect; if self-draw checked, disable it.\
+      const isDiscard = document.getElementById('discardRadio').checked;\
+      loserSelect.disabled = !isDiscard;\
+    \}\
+\
+    // Update the scoreboard and history list in summary screen\
+    function updateSummaryUI() \{\
+      // Update total scores list\
+      const scoreList = document.getElementById('scoreList');\
+      scoreList.innerHTML = "";\
+      players.forEach((name, idx) => \{\
+        const li = document.createElement('li');\
+        li.textContent = name + ": " + scores[idx] + " points";\
+        scoreList.appendChild(li);\
+      \});\
+      // Update history list\
+      const historyList = document.getElementById('historyList');\
+      historyList.innerHTML = "";\
+      history.forEach(entry => \{\
+        const li = document.createElement('li');\
+        // Format history entry text\
+        // e.g., "Round 1 (Don: X, Nan: Y, Xi: Z, Bei: W) - Winner: X won 8 points (self-draw)."\
+        let text = "Round " + entry.round + " (";\
+        // include wind assignment in history\
+        for (let w = 0; w < 4; w++) \{\
+          const playerName = players[ entry.windOrder[w] ];\
+          text += winds[w] + ": " + playerName;\
+          if (w < 3) text += ", ";\
+        \}\
+        text += ") - Winner: " + players[entry.winner];\
+        text += " won " + entry.points + " points";\
+        if (entry.type === "self") \{\
+          text += " (self-draw).";\
+        \} else \{\
+          text += " (won on discard from " + players[entry.loser] + ").";\
+        \}\
+        li.textContent = text;\
+        historyList.appendChild(li);\
+      \});\
+    \}\
+\
+    // Event handlers\
+    document.getElementById('startGameBtn').addEventListener('click', () => \{\
+      // Gather player names\
+      const n1 = document.getElementById('name1').value.trim();\
+      const n2 = document.getElementById('name2').value.trim();\
+      const n3 = document.getElementById('name3').value.trim();\
+      const n4 = document.getElementById('name4').value.trim();\
+      if (!n1 || !n2 || !n3 || !n4) \{\
+        alert("Please enter all four player names.");\
+        return;\
+      \}\
+      players = [n1, n2, n3, n4];\
+      // Initialize scores to 0\
+      scores = [0, 0, 0, 0];\
+      round = 1;\
+      history = [];\
+      // Assign initial winds randomly\
+      assignInitialWinds();\
+      // Update UI for wind assignment\
+      updateWindAssignmentUI();\
+      // Show wind assignment screen\
+      showScreen('windScreen');\
+    \});\
+\
+    document.getElementById('toScoreInputBtn').addEventListener('click', () => \{\
+      // Move from wind assignment recap to score input screen\
+      populateWinnerDropdown();\
+      // Default to self-draw, so ensure radio selection and loserSelect disabled\
+      document.getElementById('selfDrawRadio').checked = true;\
+      document.getElementById('discardRadio').checked = false;\
+      document.getElementById('loserSelect').disabled = true;\
+      updateLoserOptions();\
+      showScreen('scoreInputScreen');\
+    \});\
+\
+    // When winner changes, update loser options\
+    document.getElementById('winnerSelect').addEventListener('change', updateLoserOptions);\
+    // When radio changes, update loserSelect state\
+    document.getElementById('selfDrawRadio').addEventListener('change', updateLoserOptions);\
+    document.getElementById('discardRadio').addEventListener('change', updateLoserOptions);\
+\
+    document.getElementById('submitScoreBtn').addEventListener('click', () => \{\
+      const winnerIdx = parseInt(document.getElementById('winnerSelect').value);\
+      const isDiscard = document.getElementById('discardRadio').checked;\
+      let loserIdx = null;\
+      if (isDiscard) \{\
+        loserIdx = parseInt(document.getElementById('loserSelect').value);\
+      \}\
+      const points = parseInt(document.getElementById('scoreInput').value);\
+      if (!points || points <= 0) \{\
+        alert("Please enter a valid score (points).");\
+        return;\
+      \}\
+      // Apply scoring:\
+      if (isDiscard) \{\
+        // Winner gains points from loser\
+        scores[winnerIdx] += points * 3;\
+        scores[loserIdx] -= points * 3;\
+      \} else \{\
+        // Self-draw: winner gains points from all 3 losers\
+        scores[winnerIdx] += points * 3;\
+        for (let i = 0; i < 4; i++) \{\
+          if (i !== winnerIdx) \{\
+            scores[i] -= points;\
+          \}\
+        \}\
+      \}\
+      // Record this round in history\
+      history.push(\{\
+        round: round,\
+        windOrder: [...seatOrder], // copy of current wind assignment\
+        winner: winnerIdx,\
+        loser: loserIdx,\
+        points: points,\
+        type: isDiscard ? "discard" : "self"\
+      \});\
+      // Update summary screen UI\
+      updateSummaryUI();\
+      // Show summary screen\
+      showScreen('summaryScreen');\
+    \});\
+\
+    document.getElementById('nextRoundBtn').addEventListener('click', () => \{\
+      // Prepare for next round\
+      round += 1;\
+      // Rotate winds for next round: move first element of seatOrder to end (cyclic rotation)\
+      seatOrder.push(seatOrder.shift());\
+      // Update wind assignment for new round and show wind screen again\
+      updateWindAssignmentUI();\
+      showScreen('windScreen');\
+      // Clear the score input field for next usage\
+      document.getElementById('scoreInput').value = "";\
+    \});\
+\
+    document.getElementById('endGameBtn').addEventListener('click', () => \{\
+      // End game: show final results (we are already on summary screen)\
+      // Optionally, reset or allow starting a new game\
+      alert("Game ended. Final scores are shown. Starting a new game...");\
+      // Restart game by going back to name input (clear old names and data)\
+      document.getElementById('name1').value = "";\
+      document.getElementById('name2').value = "";\
+      document.getElementById('name3').value = "";\
+      document.getElementById('name4').value = "";\
+      showScreen('playerInputScreen');\
+    \});\
+  </script>\
+</body>\
+</html>\
+}
