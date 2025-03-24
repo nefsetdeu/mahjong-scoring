@@ -1,403 +1,1007 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2709
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chinese Mahjong Scorekeeper</title>
+  <style>
+    :root {
+      --red: #A00000;
+      --gold: #FFD700;
+      --light-gold: #ffeba1;
+      --dark-red: #700000;
+      --white: #fff;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-image: url('/Users/tyson/Downloads/mahjongback.jpg');
+      background-size: cover;
+      background-position: center;
+      color: var(--gold);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    h1, h2, h3, h4, h5 {
+      margin: 0.5em 0;
+    }
+    /* Screen container */
+    .screen {
+      display: none;
+      padding: 20px;
+      width: 100%;
+      max-width: 500px;
+      box-sizing: border-box;
+      background-color: transparent;
+      border-radius: 10px;
+    }
+    .screen.active {
+      display: block;
+    }
+    /* Form styles */
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      margin: 0 auto;
+    }
+    .form-group {
+      margin: 15px 0;
+      text-align: left;
+      display: flex;
+      align-items: center;
+    }
+    .form-group label {
+      flex: 1;
+      margin-bottom: 0;
+      font-size: 0.9em;
+      color: var(--gold);
+    }
+    .form-group input[type=text],
+    .form-group select {
+      flex: 1;
+      padding: 10px;
+      box-sizing: border-box;
+      font-size: 1em;
+      border: 2px solid var(--gold);
+      border-radius: 5px;
+      background: #fff8e1;
+      color: #000;
+      margin-right: 10px;
+    }
+    .form-group select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      color: #000;
+    }
+    /* Buttons */
+    .btn {
+      background-color: var(--gold);
+      color: var(--dark-red);
+      border: none;
+      padding: 12px 18px;
+      margin: 15px 5px 5px;
+      font-size: 1em;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s;
+    }
+    .btn:hover {
+      background-color: var(--light-gold);
+    }
+    /* Wind assignment display */
+    .winds {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .wind-seat {
+      background: var(--dark-red);
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+      padding: 15px;
+      margin: 10px;
+      min-width: 120px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .wind-seat h3 {
+      margin: 0;
+      font-size: 1.2em;
+      color: var(--gold);
+    }
+    .wind-seat p {
+      margin: 5px 0 0;
+      font-size: 1em;
+      color: #fff;
+    }
+    /* Tile grid */
+    #tileGrid {
+      margin: 20px 0;
+      text-align: left;
+    }
+    #tileGrid h3 {
+      font-size: 1.1em;
+      margin-bottom: 5px;
+      color: var(--light-gold);
+    }
+    .tile-section {
+      margin-bottom: 15px;
+    }
+    .tile-section h4 {
+      font-size: 1em;
+      margin-bottom: 5px;
+      color: var(--white);
+    }
+    .tiles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tile {
+      display: inline-block;
+      padding: 8px;
+      font-size: 1.5em;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 5px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .tile:hover {
+      background-color: var(--gold);
+      color: var(--dark-red);
+    }
+    /* Scoring details */
+    #playersScoringDetails {
+      text-align: left;
+      margin: 15px 0;
+    }
+    .player-section {
+      border: 1px solid var(--gold);
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .player-section h4 {
+      margin: 0 0 10px;
+      font-size: 1.1em;
+      color: var(--white);
+      text-align: center;
+    }
+    .player-section .meld-inputs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 0.9em;
+    }
+    .meld-inputs label {
+      flex: 1 1 45%;
+    }
+    .meld-inputs input[type=number] {
+      width: 4em;
+      padding: 5px;
+      font-size: 1em;
+      margin-left: 5px;
+    }
+    .special-checks {
+      font-size: 0.9em;
+      margin-top: 20px;
+      text-align: left; /* Align text to the left */
+    }
+    .special-checks label {
+      display: flex;
+      align-items: center; /* Align items in a row */
+      margin: 5px 0;
+    }
+    .special-checks input[type=checkbox] {
+      margin-right: 10px; /* Add space between checkbox and text */
+    }
+    /* Results and history */
+    #handResultSummary {
+      margin-bottom: 20px;
+      font-size: 1.2em;
+    }
+    #standingsList {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0 20px;
+    }
+    #standingsList li {
+      margin: 5px 0;
+      font-size: 1.1em;
+    }
+    #historyList {
+      font-size: 0.9em;
+      text-align: left;
+      max-height: 150px;
+      overflow-y: auto;
+      padding-left: 20px;
+      margin: 10px 0 20px;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    /* Preview points */
+    .preview-points {
+      margin-top: 15px;
+      font-size: 1.3em;
+      color: var(--light-gold);
+    }
+  </style>
+</head>
+<body>
+  <!-- Screen 1: Player Names Input -->
+  <section id="screen-name-input" class="screen active">
+    <h1>Chinese Mahjong Scorekeeper</h1>
+    <p>Enter four player names and select their winds:</p>
+    <form id="nameForm">
+      <div class="form-group">
+        <label for="player1">Player 1:</label>
+        <input type="text" id="player1" required />
+        <select id="wind1">
+          <option value="East">East</option>
+          <option value="South">South</option>
+          <option value="West">West</option>
+          <option value="North">North</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="player2">Player 2:</label>
+        <input type="text" id="player2" required />
+        <select id="wind2">
+          <option value="East">East</option>
+          <option value="South">South</option>
+          <option value="West">West</option>
+          <option value="North">North</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="player3">Player 3:</label>
+        <input type="text" id="player3" required />
+        <select id="wind3">
+          <option value="East">East</option>
+          <option value="South">South</option>
+          <option value="West">West</option>
+          <option value="North">North</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="player4">Player 4:</label>
+        <input type="text" id="player4" required />
+        <select id="wind4">
+          <option value="East">East</option>
+          <option value="South">South</option>
+          <option value="West">West</option>
+          <option value="North">North</option>
+        </select>
+      </div>
+      <button type="submit" class="btn">Start Game</button>
+    </form>
+  </section>
 
-\f0\fs24 \cf0 <!DOCTYPE html>\
-<html lang="en">\
-<head>\
-  <meta charset="UTF-8" />\
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />\
-  <title>Mahjong Scorekeeper</title>\
-  <!-- Styles: red & gold Chinese theme -->\
-  <style>\
-    body \{\
-      background: #8B0000; /* dark red background */\
-      color: #FFFFFF;     /* white text (use gold for highlights) */\
-      font-family: sans-serif;\
-      margin: 0;\
-      padding: 0;\
-    \}\
-    #app \{\
-      max-width: 600px;\
-      margin: auto;\
-      padding: 10px;\
-      /* Optional: add a subtle patterned background or border for Chinese theme */\
-      border: 3px double gold;\
-      border-radius: 8px;\
-      background: rgba(0,0,0,0.1); /* slight transparent overlay */\
-    \}\
-    h1, h2 \{\
-      text-align: center;\
-      color: gold;\
-      margin: 10px 0;\
-    \}\
-    .screen \{\
-      display: none; /* all screens hidden by default, we will show one at a time */\
-    \}\
-    .screen.active \{\
-      display: block;\
-    \}\
-    /* Form elements styling for mobile */\
-    label \{\
-      display: block;\
-      margin: 8px 0 4px;\
-      font-weight: bold;\
-    \}\
-    input[type=text], input[type=number], select \{\
-      width: 100%;\
-      padding: 8px;\
-      font-size: 16px;\
-      border: 2px solid gold;\
-      border-radius: 4px;\
-      background: #330000; /* dark background for inputs to match theme */\
-      color: #FFFFFF;\
-      box-sizing: border-box;\
-      -webkit-appearance: none;\
-      appearance: none;\
-    \}\
-    input[type=number]::-webkit-outer-spin-button,\
-    input[type=number]::-webkit-inner-spin-button \{\
-      -webkit-appearance: none;\
-      margin: 0;\
-    \}\
-    /* Radio buttons */\
-    .radio-group \{\
-      margin: 8px 0;\
-    \}\
-    .radio-group label \{\
-      display: inline-block;\
-      font-weight: normal;\
-      margin-right: 10px;\
-    \}\
-    .radio-group input[type=radio] \{\
-      margin-right: 4px;\
-    \}\
-    /* Buttons */\
-    button \{\
-      background: gold;\
-      color: #8B0000;\
-      font-weight: bold;\
-      border: 2px solid #8B0000;\
-      border-radius: 4px;\
-      padding: 10px 20px;\
-      font-size: 16px;\
-      margin: 10px 5px 0 0;\
-      cursor: pointer;\
-      -webkit-appearance: none;\
-      appearance: none;\
-    \}\
-    button:hover \{\
-      background: #ffd700cc; /* slightly darker on hover */\
-    \}\
-    /* Scoreboard and history */\
-    #scoreboard ul, #history ul \{\
-      list-style: none;\
-      padding: 0;\
-    \}\
-    #scoreboard li, #history li \{\
-      margin: 4px 0;\
-    \}\
-    #history li \{\
-      font-size: 14px;\
-    \}\
-    #history li span.wind-assign \{\
-      color: gold;\
-    \}\
-  </style>\
-</head>\
-<body>\
-  <div id="app">\
-    <h1>Mahjong Scorekeeper</h1>\
-    <!-- Screen 1: Player name input -->\
-    <div id="playerInputScreen" class="screen active">\
-      <h2>Enter Player Names</h2>\
-      <p>Please enter the names of the 4 players:</p>\
-      <div>\
-        <label for="name1">Player 1:</label>\
-        <input type="text" id="name1" placeholder="Name 1" />\
-      </div>\
-      <div>\
-        <label for="name2">Player 2:</label>\
-        <input type="text" id="name2" placeholder="Name 2" />\
-      </div>\
-      <div>\
-        <label for="name3">Player 3:</label>\
-        <input type="text" id="name3" placeholder="Name 3" />\
-      </div>\
-      <div>\
-        <label for="name4">Player 4:</label>\
-        <input type="text" id="name4" placeholder="Name 4" />\
-      </div>\
-      <button id="startGameBtn">Start Game</button>\
-    </div>\
-\
-    <!-- Screen 2: Wind assignment recap for current round -->\
-    <div id="windScreen" class="screen">\
-      <h2>Round <span id="roundNumber">1</span> - Winds Assignment</h2>\
-      <p>Assigned winds for this round:</p>\
-      <ul id="windAssignmentList">\
-        <!-- e.g., <li>Don: PlayerName</li> etc. will be filled by script -->\
-      </ul>\
-      <button id="toScoreInputBtn">Continue</button>\
-    </div>\
-\
-    <!-- Screen 3: Score input for the round result -->\
-    <div id="scoreInputScreen" class="screen">\
-      <h2>Round <span id="roundNumber2">1</span> - Enter Round Result</h2>\
-      <label for="winnerSelect">Winner:</label>\
-      <select id="winnerSelect">\
-        <!-- options will be populated by script with player names -->\
-      </select>\
-      <div class="radio-group">\
-        <label><input type="radio" name="winType" value="self" id="selfDrawRadio" checked /> Self-draw (win by self)</label>\
-        <label><input type="radio" name="winType" value="discard" id="discardRadio" /> Win by discard from:</label>\
-      </div>\
-      <select id="loserSelect" disabled>\
-        <!-- populated with losing players if "discard" is selected -->\
-      </select>\
-      <label for="scoreInput">Score (points):</label>\
-      <!-- Note: for simplicity we use a number input. For a more thematic approach, you could replace this with Mahjong tile images as input buttons. -->\
-      <input type="number" id="scoreInput" min="1" max="88" placeholder="e.g., 8" />\
-      <button id="submitScoreBtn">Submit Score</button>\
-    </div>\
-\
-    <!-- Screen 4: Summary of scores and history after each round -->\
-    <div id="summaryScreen" class="screen">\
-      <h2>Game Summary</h2>\
-      <div id="scoreboard">\
-        <h3>Total Scores:</h3>\
-        <ul id="scoreList">\
-          <!-- list of "Name: score" -->\
-        </ul>\
-      </div>\
-      <div id="history">\
-        <h3>Round History:</h3>\
-        <ul id="historyList">\
-          <!-- round history entries -->\
-        </ul>\
-      </div>\
-      <button id="nextRoundBtn">Next Round</button>\
-      <button id="endGameBtn">End Game</button>\
-    </div>\
-  </div> <!-- end #app container -->\
-\
-  <!-- JavaScript logic -->\
-  <script>\
-    // Global variables to hold game state\
-    let players = [];          // array of player names (length 4)\
-    let scores = [0, 0, 0, 0];  // total scores corresponding to players array\
-    let seatOrder = [0, 1, 2, 3]; // will represent the indices of players assigned to Don,Nan,Xi,Bei\
-    let round = 1;\
-    const winds = ["Don", "Nan", "Xi", "Bei"]; // names for East, South, West, North winds\
-    let history = [];          // history of rounds (each entry an object with details)\
-\
-    // Helper: show a screen by id and hide others\
-    function showScreen(screenId) \{\
-      document.querySelectorAll('.screen').forEach(div => \{\
-        div.classList.remove('active');\
-      \});\
-      document.getElementById(screenId).classList.add('active');\
-    \}\
-\
-    // Assign initial winds randomly\
-    function assignInitialWinds() \{\
-      // Randomize the seatOrder array\
-      for (let i = seatOrder.length - 1; i > 0; i--) \{\
-        const j = Math.floor(Math.random() * (i + 1));\
-        [seatOrder[i], seatOrder[j]] = [seatOrder[j], seatOrder[i]];\
-      \}\
-    \}\
-\
-    // Update the wind assignment list UI for current round\
-    function updateWindAssignmentUI() \{\
-      const list = document.getElementById('windAssignmentList');\
-      list.innerHTML = "";\
-      for (let w = 0; w < 4; w++) \{\
-        const li = document.createElement('li');\
-        const playerIndex = seatOrder[w];\
-        li.textContent = winds[w] + ": " + players[playerIndex];\
-        list.appendChild(li);\
-      \}\
-      // update round number display\
-      document.getElementById('roundNumber').textContent = round;\
-      document.getElementById('roundNumber2').textContent = round;\
-    \}\
-\
-    // Populate the winner dropdown with player names\
-    function populateWinnerDropdown() \{\
-      const winnerSelect = document.getElementById('winnerSelect');\
-      winnerSelect.innerHTML = "";\
-      players.forEach((name, idx) => \{\
-        const opt = document.createElement('option');\
-        opt.value = idx;\
-        opt.textContent = name;\
-        winnerSelect.appendChild(opt);\
-      \});\
-    \}\
-\
-    // Update loser dropdown options to exclude current winner\
-    function updateLoserOptions() \{\
-      const loserSelect = document.getElementById('loserSelect');\
-      const winnerIdx = parseInt(document.getElementById('winnerSelect').value);\
-      loserSelect.innerHTML = "";\
-      players.forEach((name, idx) => \{\
-        if (idx !== winnerIdx) \{\
-          const opt = document.createElement('option');\
-          opt.value = idx;\
-          opt.textContent = name;\
-          loserSelect.appendChild(opt);\
-        \}\
-      \});\
-      // If discard radio is checked, enable loserSelect; if self-draw checked, disable it.\
-      const isDiscard = document.getElementById('discardRadio').checked;\
-      loserSelect.disabled = !isDiscard;\
-    \}\
-\
-    // Update the scoreboard and history list in summary screen\
-    function updateSummaryUI() \{\
-      // Update total scores list\
-      const scoreList = document.getElementById('scoreList');\
-      scoreList.innerHTML = "";\
-      players.forEach((name, idx) => \{\
-        const li = document.createElement('li');\
-        li.textContent = name + ": " + scores[idx] + " points";\
-        scoreList.appendChild(li);\
-      \});\
-      // Update history list\
-      const historyList = document.getElementById('historyList');\
-      historyList.innerHTML = "";\
-      history.forEach(entry => \{\
-        const li = document.createElement('li');\
-        // Format history entry text\
-        // e.g., "Round 1 (Don: X, Nan: Y, Xi: Z, Bei: W) - Winner: X won 8 points (self-draw)."\
-        let text = "Round " + entry.round + " (";\
-        // include wind assignment in history\
-        for (let w = 0; w < 4; w++) \{\
-          const playerName = players[ entry.windOrder[w] ];\
-          text += winds[w] + ": " + playerName;\
-          if (w < 3) text += ", ";\
-        \}\
-        text += ") - Winner: " + players[entry.winner];\
-        text += " won " + entry.points + " points";\
-        if (entry.type === "self") \{\
-          text += " (self-draw).";\
-        \} else \{\
-          text += " (won on discard from " + players[entry.loser] + ").";\
-        \}\
-        li.textContent = text;\
-        historyList.appendChild(li);\
-      \});\
-    \}\
-\
-    // Event handlers\
-    document.getElementById('startGameBtn').addEventListener('click', () => \{\
-      // Gather player names\
-      const n1 = document.getElementById('name1').value.trim();\
-      const n2 = document.getElementById('name2').value.trim();\
-      const n3 = document.getElementById('name3').value.trim();\
-      const n4 = document.getElementById('name4').value.trim();\
-      if (!n1 || !n2 || !n3 || !n4) \{\
-        alert("Please enter all four player names.");\
-        return;\
-      \}\
-      players = [n1, n2, n3, n4];\
-      // Initialize scores to 0\
-      scores = [0, 0, 0, 0];\
-      round = 1;\
-      history = [];\
-      // Assign initial winds randomly\
-      assignInitialWinds();\
-      // Update UI for wind assignment\
-      updateWindAssignmentUI();\
-      // Show wind assignment screen\
-      showScreen('windScreen');\
-    \});\
-\
-    document.getElementById('toScoreInputBtn').addEventListener('click', () => \{\
-      // Move from wind assignment recap to score input screen\
-      populateWinnerDropdown();\
-      // Default to self-draw, so ensure radio selection and loserSelect disabled\
-      document.getElementById('selfDrawRadio').checked = true;\
-      document.getElementById('discardRadio').checked = false;\
-      document.getElementById('loserSelect').disabled = true;\
-      updateLoserOptions();\
-      showScreen('scoreInputScreen');\
-    \});\
-\
-    // When winner changes, update loser options\
-    document.getElementById('winnerSelect').addEventListener('change', updateLoserOptions);\
-    // When radio changes, update loserSelect state\
-    document.getElementById('selfDrawRadio').addEventListener('change', updateLoserOptions);\
-    document.getElementById('discardRadio').addEventListener('change', updateLoserOptions);\
-\
-    document.getElementById('submitScoreBtn').addEventListener('click', () => \{\
-      const winnerIdx = parseInt(document.getElementById('winnerSelect').value);\
-      const isDiscard = document.getElementById('discardRadio').checked;\
-      let loserIdx = null;\
-      if (isDiscard) \{\
-        loserIdx = parseInt(document.getElementById('loserSelect').value);\
-      \}\
-      const points = parseInt(document.getElementById('scoreInput').value);\
-      if (!points || points <= 0) \{\
-        alert("Please enter a valid score (points).");\
-        return;\
-      \}\
-      // Apply scoring:\
-      if (isDiscard) \{\
-        // Winner gains points from loser\
-        scores[winnerIdx] += points * 3;\
-        scores[loserIdx] -= points * 3;\
-      \} else \{\
-        // Self-draw: winner gains points from all 3 losers\
-        scores[winnerIdx] += points * 3;\
-        for (let i = 0; i < 4; i++) \{\
-          if (i !== winnerIdx) \{\
-            scores[i] -= points;\
-          \}\
-        \}\
-      \}\
-      // Record this round in history\
-      history.push(\{\
-        round: round,\
-        windOrder: [...seatOrder], // copy of current wind assignment\
-        winner: winnerIdx,\
-        loser: loserIdx,\
-        points: points,\
-        type: isDiscard ? "discard" : "self"\
-      \});\
-      // Update summary screen UI\
-      updateSummaryUI();\
-      // Show summary screen\
-      showScreen('summaryScreen');\
-    \});\
-\
-    document.getElementById('nextRoundBtn').addEventListener('click', () => \{\
-      // Prepare for next round\
-      round += 1;\
-      // Rotate winds for next round: move first element of seatOrder to end (cyclic rotation)\
-      seatOrder.push(seatOrder.shift());\
-      // Update wind assignment for new round and show wind screen again\
-      updateWindAssignmentUI();\
-      showScreen('windScreen');\
-      // Clear the score input field for next usage\
-      document.getElementById('scoreInput').value = "";\
-    \});\
-\
-    document.getElementById('endGameBtn').addEventListener('click', () => \{\
-      // End game: show final results (we are already on summary screen)\
-      // Optionally, reset or allow starting a new game\
-      alert("Game ended. Final scores are shown. Starting a new game...");\
-      // Restart game by going back to name input (clear old names and data)\
-      document.getElementById('name1').value = "";\
-      document.getElementById('name2').value = "";\
-      document.getElementById('name3').value = "";\
-      document.getElementById('name4').value = "";\
-      showScreen('playerInputScreen');\
-    \});\
-  </script>\
-</body>\
-</html>\
-}
+  <!-- Screen 2: Confirm Names and Wind Assignment -->
+  <section id="screen-wind-assign" class="screen">
+    <h2>Seat Wind Assignment</h2>
+    <p id="round-info">Round: <span id="current-round-name">East</span> (東)</p>
+    <div id="windAssignment" class="winds"></div>
+    <button id="beginRoundBtn" class="btn">Begin Round 1</button>
+  </section>
+
+  <!-- Screen 3: Choose Winner -->
+  <section id="screen-choose-winner" class="screen">
+    <h2>Choose Winner - <span id="currentRoundLabel">East Round</span></h2>
+    <form id="winnerForm">
+      <div class="form-group">
+        <label for="winnerSelect">Winning Player:</label>
+        <select id="winnerSelect">
+          <option value="draw">No Winner (Draw)</option>
+          <!-- Options populated dynamically -->
+        </select>
+      </div>
+      <div id="winDetails">
+        <div class="form-group">
+          <label>Win Type:</label>
+          <label><input type="radio" name="winType" value="self" /> Self-draw (from wall)</label>
+          <label><input type="radio" name="winType" value="discard" /> Won on discard</label>
+        </div>
+        <div class="form-group" id="discarderGroup">
+          <label for="discarderSelect">Discarder:</label>
+          <select id="discarderSelect">
+            <!-- Options populated dynamically -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="winFromBack" />
+            Won on last tile from back of wall (kong supplement)
+          </label>
+        </div>
+      </div>
+      <button type="submit" class="btn">Next</button>
+    </form>
+  </section>
+
+  <!-- Screen 4: Player 1 Hand Details -->
+  <section id="screen-player1-details" class="screen">
+    <h2 id="player1Header">Hand Details</h2>
+    <div id="player1ScoringDetails" class="player-section">
+      <h4 id="player1NameWind">Player 1</h4>
+      <div class="meld-inputs">
+        <label>Open Pungs 2-8: <input type="number" min="0" value="0" class="openPungSimple"></label>
+        <label>Closed Pungs 2-8: <input type="number" min="0" value="0" class="closedPungSimple"></label>
+        <label>Open Pungs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="openPungHonors"></label>
+        <label>Closed Pungs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="closedPungHonors"></label>
+        <label>Open Kongs 2-8: <input type="number" min="0" value="0" class="openKongSimple"></label>
+        <label>Closed Kongs 2-8: <input type="number" min="0" value="0" class="closedKongSimple"></label>
+        <label>Open Kongs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="openKongHonors"></label>
+        <label>Closed Kongs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="closedKongHonors"></label>
+      </div>
+      <div class="special-checks">
+        <label>
+          <input type="checkbox" class="valuePair">
+          A pair of dragons or your/prevailing wind; +2pts
+        </label>
+      </div>
+      <div class="preview-points">Points: <span id="player1Points">0</span> (Preview: <span id="player1PreviewPoints">0</span>)</div>
+    </div>
+    <button id="nextPlayer1Btn" class="btn">Next Player</button>
+  </section>
+
+  <!-- Screen 5: Player 2 Hand Details -->
+  <section id="screen-player2-details" class="screen">
+    <h2 id="player2Header">Hand Details</h2>
+    <div id="player2ScoringDetails" class="player-section">
+      <h4 id="player2NameWind">Player 2</h4>
+      <div class="meld-inputs">
+        <label>Open Pungs 2-8: <input type="number" min="0" value="0" class="openPungSimple"></label>
+        <label>Closed Pungs 2-8: <input type="number" min="0" value="0" class="closedPungSimple"></label>
+        <label>Open Pungs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="openPungHonors"></label>
+        <label>Closed Pungs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="closedPungHonors"></label>
+        <label>Open Kongs 2-8: <input type="number" min="0" value="0" class="openKongSimple"></label>
+        <label>Closed Kongs 2-8: <input type="number" min="0" value="0" class="closedKongSimple"></label>
+        <label>Open Kongs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="openKongHonors"></label>
+        <label>Closed Kongs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="closedKongHonors"></label>
+      </div>
+      <div class="special-checks">
+        <label>
+          <input type="checkbox" class="valuePair">
+          A pair of dragons or your/prevailing wind; +2pts
+        </label>
+      </div>
+      <div class="preview-points">Points: <span id="player2Points">0</span> (Preview: <span id="player2PreviewPoints">0</span>)</div>
+    </div>
+    <button id="nextPlayer2Btn" class="btn">Next Player</button>
+  </section>
+
+  <!-- Screen 6: Player 3 Hand Details -->
+  <section id="screen-player3-details" class="screen">
+    <h2 id="player3Header">Hand Details</h2>
+    <div id="player3ScoringDetails" class="player-section">
+      <h4 id="player3NameWind">Player 3</h4>
+      <div class="meld-inputs">
+        <label>Open Pungs 2-8: <input type="number" min="0" value="0" class="openPungSimple"></label>
+        <label>Closed Pungs 2-8: <input type="number" min="0" value="0" class="closedPungSimple"></label>
+        <label>Open Pungs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="openPungHonors"></label>
+        <label>Closed Pungs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="closedPungHonors"></label>
+        <label>Open Kongs 2-8: <input type="number" min="0" value="0" class="openKongSimple"></label>
+        <label>Closed Kongs 2-8: <input type="number" min="0" value="0" class="closedKongSimple"></label>
+        <label>Open Kongs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="openKongHonors"></label>
+        <label>Closed Kongs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="closedKongHonors"></label>
+      </div>
+      <div class="special-checks">
+        <label>
+          <input type="checkbox" class="valuePair">
+          A pair of dragons or your/prevailing wind; +2pts
+        </label>
+      </div>
+      <div class="preview-points">Points: <span id="player3Points">0</span> (Preview: <span id="player3PreviewPoints">0</span>)</div>
+    </div>
+    <button id="nextPlayer3Btn" class="btn">Next Player</button>
+  </section>
+
+  <!-- Screen 7: Player 4 Hand Details -->
+  <section id="screen-player4-details" class="screen">
+    <h2 id="player4Header">Hand Details</h2>
+    <div id="player4ScoringDetails" class="player-section">
+      <h4 id="player4NameWind">Player 4</h4>
+      <div class="meld-inputs">
+        <label>Open Pungs 2-8: <input type="number" min="0" value="0" class="openPungSimple"></label>
+        <label>Closed Pungs 2-8: <input type="number" min="0" value="0" class="closedPungSimple"></label>
+        <label>Open Pungs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="openPungHonors"></label>
+        <label>Closed Pungs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="closedPungHonors"></label>
+        <label>Open Kongs 2-8: <input type="number" min="0" value="0" class="openKongSimple"></label>
+        <label>Closed Kongs 2-8: <input type="number" min="0" value="0" class="closedKongSimple"></label>
+        <label>Open Kongs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="openKongHonors"></label>
+        <label>Closed Kongs 1/9/Wind/Dragon: <input type="number" min="0" value="0" class="closedKongHonors"></label>
+      </div>
+      <div class="special-checks">
+        <label>
+          <input type="checkbox" class="valuePair">
+          A pair of dragons or your/prevailing wind; +2pts
+        </label>
+      </div>
+      <div class="preview-points">Points: <span id="player4Points">0</span> (Preview: <span id="player4PreviewPoints">0</span>)</div>
+    </div>
+    <button id="calculateScoreBtn" class="btn">Calculate Score</button>
+  </section>
+
+  <!-- Screen 8: Results and History -->
+  <section id="screen-results" class="screen">
+    <h2>Results</h2>
+    <div id="handResultSummary"></div>
+    <h3>Current Standings:</h3>
+    <ul id="standingsList"></ul>
+    <h3>Round History:</h3>
+    <ol id="historyList"></ol>
+    <div class="buttons">
+      <button id="nextHandBtn" class="btn">Next Hand</button>
+      <button id="endGameBtn" class="btn">End Game</button>
+    </div>
+  </section>
+
+  <script>
+    // Utility: Fisher-Yates shuffle
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+    // Game state variables
+    let players = [];  // Each player: { name, seatWind, score }
+    let prevailingWind = 'East';  // Current round's wind
+    let roundNumber = 1;
+    let dealerIndex = 0;
+    let roundHistory = [];
+    let currentStep = 1;
+    let handDetails = [];
+    let winnerIndex = null;  // Store the winner index
+    // Cached DOM elements
+    const nameForm = document.getElementById('nameForm');
+    const windAssignDiv = document.getElementById('windAssignment');
+    const currentRoundNameSpan = document.getElementById('current-round-name');
+    const beginRoundBtn = document.getElementById('beginRoundBtn');
+    const winnerForm = document.getElementById('winnerForm');
+    const winnerSelect = document.getElementById('winnerSelect');
+    const discarderGroup = document.getElementById('discarderGroup');
+    const discarderSelect = document.getElementById('discarderSelect');
+    const winDetailsDiv = document.getElementById('winDetails');
+    const winTypeRadios = winnerForm.querySelectorAll('input[name="winType"]');
+    const winFromBackCheckbox = document.getElementById('winFromBack');
+    const player1ScoringDetails = document.getElementById('player1ScoringDetails');
+    const player2ScoringDetails = document.getElementById('player2ScoringDetails');
+    const player3ScoringDetails = document.getElementById('player3ScoringDetails');
+    const player4ScoringDetails = document.getElementById('player4ScoringDetails');
+    const nextPlayer1Btn = document.getElementById('nextPlayer1Btn');
+    const nextPlayer2Btn = document.getElementById('nextPlayer2Btn');
+    const nextPlayer3Btn = document.getElementById('nextPlayer3Btn');
+    const calculateScoreBtn = document.getElementById('calculateScoreBtn');
+    const currentRoundLabel = document.getElementById('currentRoundLabel');
+    const handResultSummaryDiv = document.getElementById('handResultSummary');
+    const standingsList = document.getElementById('standingsList');
+    const historyList = document.getElementById('historyList');
+    const nextHandBtn = document.getElementById('nextHandBtn');
+    const endGameBtn = document.getElementById('endGameBtn');
+
+    // Function to show a screen by its ID
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    }
+    // Setup scoring input fields
+    function setupScoringForm() {
+      // Populate winner select options
+      winnerSelect.innerHTML = '<option value="draw">No Winner (Draw)</option>';
+      players.forEach((p, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = p.name;
+        winnerSelect.appendChild(opt);
+      });
+      // Populate discarder select (will be updated on winner change)
+      discarderSelect.innerHTML = '';
+      players.forEach((p, idx) => {
+        if (idx !== 0) {
+          const opt = document.createElement('option');
+          opt.value = idx;
+          opt.textContent = p.name;
+          discarderSelect.appendChild(opt);
+        }
+      });
+    }
+    // Update winner section with extra checkboxes
+    function updateWinnerSpecialSection() {
+      handDetails.forEach(section => {
+        section.querySelectorAll('.winner-special').forEach(el => el.remove());
+      });
+      if (winnerIndex === null || winnerIndex === 'draw') return;
+      const winnerSection = handDetails[winnerIndex];
+      if (!winnerSection) return;
+      const specialChecksDiv = winnerSection.querySelector('.special-checks');
+      const unusualDiv = document.createElement('div');
+      unusualDiv.className = 'winner-special';
+      unusualDiv.innerHTML = `
+        <label>
+          <input type="checkbox" class="singleWait">
+          Win with the final tile completing your pair; +2pts
+        </label>
+        <label>
+          <input type="checkbox" class="edgeWait">
+          Win on an edge or closed wait tile; +2pts
+        </label>
+        <label>
+          <input type="checkbox" class="valueSet">
+          Dragon tiles OR relevant wind position tiles; x2
+        </label>
+        <label>
+          <input type="checkbox" class="allPungs">
+          All sets – Hand with only triplets/kongs (no runs); x2
+        </label>
+        <label>
+          <input type="checkbox" class="allChows">
+          All runs – Hand with only sequences (no triplets/kongs); x2
+        </label>
+        <label>
+          <input type="checkbox" class="oneSuit">
+          Hand of one suit plus honors; x2
+        </label>
+        <label>
+          <input type="checkbox" class="fullyConcealed">
+          Win with a completely concealed hand; x2
+        </label>
+        <label>
+          <input type="checkbox" class="winFromBack">
+          Draw the winning tile of the wall; x2
+        </label>
+      `;
+      specialChecksDiv.appendChild(unusualDiv);
+
+      // Attach event listeners to the new checkboxes
+      unusualDiv.querySelectorAll('input[type=checkbox]').forEach(input => {
+        input.addEventListener('input', () => {
+          const points = calculatePlayerPoints(winnerSection, true);
+          playerPointsDisplays[winnerIndex].textContent = Math.ceil(points / 10) * 10;
+          playerPreviewPointsDisplays[winnerIndex].textContent = points;
+        });
+      });
+    }
+    // Calculate scores for the hand
+    function calculateScores() {
+      const winnerVal = winnerSelect.value;
+      const isDraw = (winnerVal === 'draw');
+      winnerIndex = isDraw ? null : parseInt(winnerVal);
+      const winType = isDraw ? null : winnerForm.querySelector('input[name="winType"]:checked')?.value;
+      const discarderIndex = isDraw || winType !== 'discard' ? null : parseInt(discarderSelect.value);
+      const wonFromBack = !isDraw && winFromBackCheckbox.checked;
+      const handScores = players.map(p => ({
+        name: p.name,
+        basePoints: 0,
+        fans: 0,
+        finalPoints: 0
+      }));
+      handDetails.forEach((section, pIndex) => {
+        const playerScore = handScores[pIndex];
+        if (!isDraw && pIndex === winnerIndex) {
+          playerScore.basePoints += 30;
+        }
+        const openPungSimple = parseInt(section.querySelector('.openPungSimple').value) || 0;
+        const closedPungSimple = parseInt(section.querySelector('.closedPungSimple').value) || 0;
+        const openPungHonors = parseInt(section.querySelector('.openPungHonors').value) || 0;
+        const closedPungHonors = parseInt(section.querySelector('.closedPungHonors').value) || 0;
+        const openKongSimple = parseInt(section.querySelector('.openKongSimple').value) || 0;
+        const closedKongSimple = parseInt(section.querySelector('.closedKongSimple').value) || 0;
+        const openKongHonors = parseInt(section.querySelector('.openKongHonors').value) || 0;
+        const closedKongHonors = parseInt(section.querySelector('.closedKongHonors').value) || 0;
+        playerScore.basePoints += openPungSimple * 2;
+        playerScore.basePoints += closedPungSimple * 4;
+        playerScore.basePoints += openPungHonors * 4;
+        playerScore.basePoints += closedPungHonors * 8;
+        playerScore.basePoints += openKongSimple * 8;
+        playerScore.basePoints += closedKongSimple * 16;
+        playerScore.basePoints += openKongHonors * 16;
+        playerScore.basePoints += closedKongHonors * 32;
+        const hasValuePair = section.querySelector('.valuePair').checked;
+        if (hasValuePair) {
+          playerScore.basePoints += 2;
+        }
+        if (!isDraw && pIndex === winnerIndex) {
+          const singleWait = section.querySelector('.singleWait')?.checked;
+          const edgeWait = section.querySelector('.edgeWait')?.checked;
+          const valueSet = section.querySelector('.valueSet')?.checked;
+          if (singleWait) playerScore.basePoints += 2;
+          if (edgeWait) playerScore.basePoints += 2;
+          if (winType === 'self') {
+            playerScore.basePoints += 2;
+          }
+          if (valueSet) {
+            const numValueSets = (parseInt(section.querySelector('.openPungHonors').value) || 0) +
+                                  (parseInt(section.querySelector('.closedPungHonors').value) || 0) +
+                                  (parseInt(section.querySelector('.openKongHonors').value) || 0) +
+                                  (parseInt(section.querySelector('.closedKongHonors').value) || 0);
+            playerScore.basePoints *= Math.pow(2, numValueSets);
+          }
+        }
+      });
+      handDetails.forEach((section, pIndex) => {
+        const playerScore = handScores[pIndex];
+        if (!isDraw && pIndex === winnerIndex) {
+          const allPungs = section.querySelector('.allPungs')?.checked;
+          const allChows = section.querySelector('.allChows')?.checked;
+          const oneSuit = section.querySelector('.oneSuit')?.checked;
+          const fullyConcealed = section.querySelector('.fullyConcealed')?.checked;
+          const winFromBack = section.querySelector('.winFromBack')?.checked;
+          if (allPungs) playerScore.basePoints *= 2;
+          if (allChows) playerScore.basePoints *= 2;
+          if (oneSuit) playerScore.basePoints *= 2;
+          if (winFromBack || wonFromBack) playerScore.basePoints *= 2;
+          if (fullyConcealed) playerScore.basePoints *= 2;
+        }
+      });
+      handScores.forEach(ps => {
+        let points = ps.basePoints;
+        if (points > 0) {
+          points = Math.ceil(points / 10) * 10;
+          if (points > 500) points = 500;
+        }
+        ps.finalPoints = points;
+      });
+      let resultText = '';
+      if (isDraw) {
+        resultText = 'Draw – no winner, no points awarded. East (dealer) remains East.';
+      } else {
+        const winnerName = players[winnerIndex].name;
+        const winSourceText = (winType === 'self') ? 'self-draw' : `discard from ${players[discarderIndex].name}`;
+        const winnerPoints = handScores[winnerIndex].finalPoints;
+        resultText = `${winnerName} wins with ${winnerPoints} points (${winSourceText}).`;
+        let totalCollected = 0;
+        players.forEach((player, idx) => {
+          if (idx === winnerIndex) return;
+          let pay = winnerPoints;
+          if (winType === 'self') {
+            pay = winnerPoints * 2;
+          } else if (winType === 'discard') {
+            if (idx === discarderIndex) {
+              pay = winnerPoints * 2;
+            }
+          }
+          handScores[idx].finalPoints -= pay;
+          handScores[winnerIndex].finalPoints += pay;
+          totalCollected += pay;
+        });
+        const loserIndexes = players.map((_, i) => i).filter(i => i !== winnerIndex);
+        for (let i = 0; i < loserIndexes.length; i++) {
+          for (let j = i + 1; j < loserIndexes.length; j++) {
+            const iIdx = loserIndexes[i];
+            const jIdx = loserIndexes[j];
+            let diff = handScores[iIdx].basePoints - handScores[jIdx].basePoints;
+            if (diff === 0) continue;
+            let payer, receiver;
+            if (diff > 0) {
+              receiver = iIdx;
+              payer = jIdx;
+            } else {
+              receiver = jIdx;
+              payer = iIdx;
+              diff = -diff;
+            }
+            const bankerIdx = dealerIndex;
+            if (payer === bankerIdx || receiver === bankerIdx) {
+              diff *= 2;
+            }
+            handScores[payer].finalPoints -= diff;
+            handScores[receiver].finalPoints += diff;
+            resultText += ` ${players[payer].name} pays ${diff} to ${players[receiver].name}.`;
+          }
+        }
+      }
+      players.forEach((player, idx) => {
+        player.score += handScores[idx].finalPoints;
+      });
+      handResultSummaryDiv.textContent = resultText;
+      standingsList.innerHTML = '';
+      players.forEach(p => {
+        const li = document.createElement('li');
+        li.textContent = `${p.name}: ${p.score} points`;
+        standingsList.appendChild(li);
+      });
+      const historyEntry = document.createElement('li');
+      historyEntry.textContent = resultText;
+      historyList.appendChild(historyEntry);
+      let dealerWon = (!isDraw && winnerIndex === dealerIndex);
+      if (!isDraw && !dealerWon) {
+        rotateSeatWinds();
+      }
+      if (checkRoundComplete()) {
+        advanceRound();
+      }
+    }
+    // Rotate seat winds (counter-clockwise)
+    function rotateSeatWinds() {
+      const windOrder = ['East', 'South', 'West', 'North'];
+      players.forEach(p => {
+        let currentIndex = windOrder.indexOf(p.seatWind);
+        p.seatWind = windOrder[(currentIndex + 1) % 4];
+      });
+      dealerIndex = players.findIndex(p => p.seatWind === 'East');
+    }
+    // Dummy function to check if round is complete
+    function checkRoundComplete() {
+      return false;
+    }
+    // Advance to next round (prevailing wind changes)
+    function advanceRound() {
+      if (prevailingWind === 'East') {
+        prevailingWind = 'South';
+        roundNumber = 2;
+      } else if (prevailingWind === 'South') {
+        prevailingWind = 'West';
+        roundNumber = 3;
+      } else if (prevailingWind === 'West') {
+        prevailingWind = 'North';
+        roundNumber = 4;
+      } else if (prevailingWind === 'North') {
+        prevailingWind = 'East';
+        roundNumber = 5;
+      }
+      document.getElementById('currentRoundLabel').textContent = `${prevailingWind} Round`;
+      currentRoundNameSpan.textContent = prevailingWind;
+    }
+    // Function to calculate points for a single player
+    function calculatePlayerPoints(section, isWinner = false) {
+      let basePoints = 0;
+      if (isWinner) {
+        basePoints += 30;
+      }
+      const openPungSimple = parseInt(section.querySelector('.openPungSimple').value) || 0;
+      const closedPungSimple = parseInt(section.querySelector('.closedPungSimple').value) || 0;
+      const openPungHonors = parseInt(section.querySelector('.openPungHonors').value) || 0;
+      const closedPungHonors = parseInt(section.querySelector('.closedPungHonors').value) || 0;
+      const openKongSimple = parseInt(section.querySelector('.openKongSimple').value) || 0;
+      const closedKongSimple = parseInt(section.querySelector('.closedKongSimple').value) || 0;
+      const openKongHonors = parseInt(section.querySelector('.openKongHonors').value) || 0;
+      const closedKongHonors = parseInt(section.querySelector('.closedKongHonors').value) || 0;
+      basePoints += openPungSimple * 2;
+      basePoints += closedPungSimple * 4;
+      basePoints += openPungHonors * 4;
+      basePoints += closedPungHonors * 8;
+      basePoints += openKongSimple * 8;
+      basePoints += closedKongSimple * 16;
+      basePoints += openKongHonors * 16;
+      basePoints += closedKongHonors * 32;
+      const hasValuePair = section.querySelector('.valuePair').checked;
+      if (hasValuePair) {
+        basePoints += 2;
+      }
+      if (isWinner) {
+        const singleWait = section.querySelector('.singleWait')?.checked;
+        const edgeWait = section.querySelector('.edgeWait')?.checked;
+        const valueSet = section.querySelector('.valueSet')?.checked;
+        if (singleWait) basePoints += 2;
+        if (edgeWait) basePoints += 2;
+        const winType = winnerForm.querySelector('input[name="winType"]:checked')?.value;
+        if (winType === 'self') {
+          basePoints += 2;
+        }
+        if (valueSet) {
+          const numValueSets = (parseInt(section.querySelector('.openPungHonors').value) || 0) +
+                                (parseInt(section.querySelector('.closedPungHonors').value) || 0) +
+                                (parseInt(section.querySelector('.openKongHonors').value) || 0) +
+                                (parseInt(section.querySelector('.closedKongHonors').value) || 0);
+          basePoints *= Math.pow(2, numValueSets);
+        }
+        const allPungs = section.querySelector('.allPungs')?.checked;
+        const allChows = section.querySelector('.allChows')?.checked;
+        const oneSuit = section.querySelector('.oneSuit')?.checked;
+        const fullyConcealed = section.querySelector('.fullyConcealed')?.checked;
+        const winFromBack = section.querySelector('.winFromBack')?.checked;
+        if (allPungs) basePoints *= 2;
+        if (allChows) basePoints *= 2;
+        if (oneSuit) basePoints *= 2;
+        if (winFromBack) basePoints *= 2;
+        if (fullyConcealed) basePoints *= 2;
+      }
+      return basePoints;
+    }
+    // Event handlers
+    nameForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const names = [
+        document.getElementById('player1').value.trim(),
+        document.getElementById('player2').value.trim(),
+        document.getElementById('player3').value.trim(),
+        document.getElementById('player4').value.trim()
+      ];
+
+      const winds = [
+        document.getElementById('wind1').value,
+        document.getElementById('wind2').value,
+        document.getElementById('wind3').value,
+        document.getElementById('wind4').value
+      ];
+
+      if (names.some(n => n === '')) {
+        alert("Please enter all four names.");
+        return;
+      }
+
+      // Check for duplicate winds
+      const windCounts = winds.reduce((acc, wind) => {
+        acc[wind] = (acc[wind] || 0) + 1;
+        return acc;
+      }, {});
+
+      if (Object.values(windCounts).some(count => count > 1)) {
+        alert("Each player must have a unique wind.");
+        return;
+      }
+
+      players = names.map((n, i) => ({ name: n, seatWind: winds[i], score: 0 }));
+
+      // Find the dealer index
+      dealerIndex = players.findIndex(p => p.seatWind === 'East');
+
+      prevailingWind = 'East';
+      roundNumber = 1;
+      currentRoundNameSpan.textContent = 'East';
+      windAssignDiv.innerHTML = '';
+      players.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'wind-seat';
+        const windSym = { 'East': '東', 'South': '南', 'West': '西', 'North': '北' }[p.seatWind] || '';
+        div.innerHTML = `<h3>${p.seatWind} ${windSym}</h3><p>${p.name}</p>`;
+        windAssignDiv.appendChild(div);
+      });
+      showScreen('screen-wind-assign');
+    });
+
+    // Update wind dropdowns dynamically
+    const windSelects = [
+      document.getElementById('wind1'),
+      document.getElementById('wind2'),
+      document.getElementById('wind3'),
+      document.getElementById('wind4')
+    ];
+
+    windSelects.forEach((select, index) => {
+      select.addEventListener('change', () => {
+        const selectedWind = select.value;
+        windSelects.forEach((otherSelect, otherIndex) => {
+          if (otherIndex !== index) {
+            const option = otherSelect.querySelector(`option[value="${selectedWind}"]`);
+            if (option) {
+              option.disabled = true;
+            }
+          }
+        });
+        windSelects.forEach((otherSelect, otherIndex) => {
+          if (otherIndex !== index) {
+            const options = otherSelect.querySelectorAll('option');
+            options.forEach(opt => {
+              if (opt.value !== selectedWind) {
+                opt.disabled = false;
+              }
+            });
+          }
+        });
+      });
+    });
+
+    beginRoundBtn.addEventListener('click', () => {
+      setupScoringForm();
+      winDetailsDiv.style.display = 'none';
+      document.getElementById('currentRoundLabel').textContent = `${prevailingWind} Round`;
+      showScreen('screen-choose-winner');
+    });
+    winnerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (winnerSelect.value === '') {
+        alert("Please select the winning player or 'Draw'.");
+        return;
+      }
+      if (winnerSelect.value !== 'draw' && !winnerForm.querySelector('input[name="winType"]:checked')) {
+        alert("Please specify the win type (self-draw or discard).");
+        return;
+      }
+      winnerIndex = parseInt(winnerSelect.value);
+      handDetails = [player1ScoringDetails, player2ScoringDetails, player3ScoringDetails, player4ScoringDetails];
+      updateWinnerSpecialSection();
+      // Update player headers with name and wind
+      document.getElementById('player1Header').textContent = `${players[0].name} - ${players[0].seatWind} Hand Details`;
+      document.getElementById('player2Header').textContent = `${players[1].name} - ${players[1].seatWind} Hand Details`;
+      document.getElementById('player3Header').textContent = `${players[2].name} - ${players[2].seatWind} Hand Details`;
+      document.getElementById('player4Header').textContent = `${players[3].name} - ${players[3].seatWind} Hand Details`;
+      document.getElementById('player1NameWind').textContent = `${players[0].name} - ${players[0].seatWind}`;
+      document.getElementById('player2NameWind').textContent = `${players[1].name} - ${players[1].seatWind}`;
+      document.getElementById('player3NameWind').textContent = `${players[2].name} - ${players[2].seatWind}`;
+      document.getElementById('player4NameWind').textContent = `${players[3].name} - ${players[3].seatWind}`;
+      showScreen('screen-player1-details');
+    });
+    nextPlayer1Btn.addEventListener('click', () => {
+      showScreen('screen-player2-details');
+    });
+    nextPlayer2Btn.addEventListener('click', () => {
+      showScreen('screen-player3-details');
+    });
+    nextPlayer3Btn.addEventListener('click', () => {
+      showScreen('screen-player4-details');
+    });
+    calculateScoreBtn.addEventListener('click', () => {
+      calculateScores();
+      showScreen('screen-results');
+    });
+    winnerSelect.addEventListener('change', () => {
+      const val = winnerSelect.value;
+      if (val === 'draw' || val === '') {
+        winDetailsDiv.style.display = 'none';
+      } else {
+        winDetailsDiv.style.display = 'block';
+        winTypeRadios.forEach(r => r.checked = false);
+        discarderSelect.innerHTML = '';
+        players.forEach((p, idx) => {
+          if (idx.toString() === val) return;
+          const opt = document.createElement('option');
+          opt.value = idx;
+          opt.textContent = p.name;
+          discarderSelect.appendChild(opt);
+        });
+        updateWinnerSpecialSection();
+      }
+    });
+    winTypeRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.checked && radio.value === 'discard') {
+          discarderGroup.style.display = 'block';
+        }
+        if (radio.checked && radio.value === 'self') {
+          discarderGroup.style.display = 'none';
+        }
+      });
+    });
+    nextHandBtn.addEventListener('click', () => {
+      setupScoringForm();
+      winnerSelect.value = '';
+      winDetailsDiv.style.display = 'none';
+      discarderGroup.style.display = 'none';
+      winFromBackCheckbox.checked = false;
+      document.getElementById('currentRoundLabel').textContent = `${prevailingWind} Round`;
+      showScreen('screen-choose-winner');
+    });
+    endGameBtn.addEventListener('click', () => {
+      handResultSummaryDiv.textContent = "Game Over. Final Standings:";
+      standingsList.innerHTML = '';
+      players.sort((a, b) => b.score - a.score).forEach(p => {
+        const li = document.createElement('li');
+        li.textContent = `${p.name}: ${p.score} points`;
+        standingsList.appendChild(li);
+      });
+      historyList.insertAdjacentHTML('beforeend', '<li><em>Game ended.</em></li>');
+      nextHandBtn.style.display = 'none';
+      endGameBtn.textContent = 'Restart';
+      endGameBtn.addEventListener('click', () => {
+        location.reload();
+      });
+    });
+    // Attach event listeners to input fields and checkboxes for real-time preview
+    const playerSections = [player1ScoringDetails, player2ScoringDetails, player3ScoringDetails, player4ScoringDetails];
+    const playerPointsDisplays = [document.getElementById('player1Points'), document.getElementById('player2Points'), document.getElementById('player3Points'), document.getElementById('player4Points')];
+    const playerPreviewPointsDisplays = [document.getElementById('player1PreviewPoints'), document.getElementById('player2PreviewPoints'), document.getElementById('player3PreviewPoints'), document.getElementById('player4PreviewPoints')];
+    playerSections.forEach((section, index) => {
+      section.querySelectorAll('input[type=number], input[type=checkbox]').forEach(input => {
+        input.addEventListener('input', () => {
+          const points = calculatePlayerPoints(section, index === winnerIndex);
+          playerPointsDisplays[index].textContent = Math.ceil(points / 10) * 10;
+          playerPreviewPointsDisplays[index].textContent = points;
+        });
+      });
+    });
+  </script>
+</body>
+</html>
